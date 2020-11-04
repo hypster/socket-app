@@ -1,0 +1,23 @@
+Here is a simple TODO list
+Everyone can comment here if he/she has any idea of plan
+
+Step 1: Implement a secure messaging functionality (client-server architecture)
+
+    a):Registration: After a client has been started, it registers at the server,
+                     providing its id, first name, last name, and public key.
+
+                    (Tianchen: If my understanding is correct, we are going to implement
+                    something like: def register(first_name, last_name):
+                    client provide full name, the def will generate a unique id and public key
+                    for him, then generate a json file similar to the json file examples)
+
+    b):If the registration was successful, the server sends an acknowledgement. Otherwise, the server returns an error.
+                    (Tianchen: I think socket already solve this problem, we just need to
+                    run the serve, from YouTube, I saw a video: https://www.youtube.com/watch?v=Lbfe3-v7yE0
+                    when client register successfully, the server will send an acknowledgement,
+                    I copy the simple code in Scripts folder, start two terminal in your computer,
+                    run ss.py first, run cc1.py in another terminal, you will see the acknowledgement message
+                    We can modify it later)
+
+    c):Send message
+                    ()
