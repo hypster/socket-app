@@ -9,8 +9,17 @@ Step 1: Implement a secure messaging functionality (client-server architecture)
                     (Tianchen: If my understanding is correct, we are going to implement
                     something like: def register(first_name, last_name):
                     client provide full name, the def will generate a unique id and public key
-                    for him, then generate a json file similar to the json file examples)
-
+                    for him, then generate a json file similar to the json file examples.)
+                    
+                    (Janneke: What I kind of got I think, is that he wants us to use the inf in the JSON as a client - 
+                    so we don't have to generate any information (such as id, public/private key etc.), but
+                    we can simply use the info already given. We could basically run the client program, read in the client 
+                    JSON file to store variables. Then see whether it executes the actions. ( I kind of got this from the answers he gave in
+                    the chat, he said that every client has a prespecified list of actions, as can be seen in the JSON.)
+                    It also said that in the def register, the arguments should be: id, first name, last name, public key. So, we 
+                    already provide all of this info (which is why I think we should just use what's given in the JSON.
+                    (I hope this makes sense))
+                    
     b):If the registration was successful, the server sends an acknowledgement. Otherwise, the server returns an error.
                     (Tianchen: I think socket already solve this problem, we just need to
                     run the serve, from YouTube, I saw a video: https://www.youtube.com/watch?v=Lbfe3-v7yE0
@@ -18,6 +27,25 @@ Step 1: Implement a secure messaging functionality (client-server architecture)
                     I copy the simple code in Scripts folder, start two terminal in your computer,
                     run ss.py first, run cc1.py in another terminal, you will see the acknowledgement message
                     We can modify it later)
+                    
+                    (Janneke: The only thing the lecturer said abt this is that we should send acknowledgement
+                    / errors over the socket (so from server--> client))
 
     c):Send message
-                    ()
+                    (Janneke: 1. If a name occurs more than once, every person with this name should get the message
+                    (lecturer said this in chat). Not case sensitive. ID is unique. )
+                    
+    (Janneke: Basically, I think our program should do smth like this:
+    1. Client is started -> read in info from JSON file, such as name, public key etc and store this in variables.
+    2. Register at server (def registration(id, firstname, lastname, public key). Send acknowledgement/error to client.
+    3. Carry out actions--> send messages
+        3.1 Retrieve public key of recipient from server, using id or name (is def arguments(id) or def arguments(first_name, last_name) in server
+        3.2 Encrypt message using public key of recipient. (should be def encrypt(public_key, message) in client I think?)
+        3.3 Send message using server (error if fails, acknowledgement if it succeeds)
+            (def send_message(id, encrypted message) or def send_message(first_name, last_name) in server)
+            3.3.1 If error, try <retries> times to send message. Wait <timeout> seconds inbetween.
+    4. Client can retrieve messages (print to logfile)
+    5. If <duration> has passed, client exits.
+    
+    ----- this is what I got from the description, at least)
+    
