@@ -15,3 +15,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     while True:
         data = s.recv(1024)
         print('Received', repr(data))
+        text = input()
+        s.sendall(bytes(text, encoding='UTF-8'))
+

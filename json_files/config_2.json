@@ -15,7 +15,7 @@
 	"server":
 	{
 		"ip": "127.0.0.1",
-		"port": "13371"
+		"port": "13370"
 	},
 	"actions": [
 		"SEND [KÜPPERS, BASTIAN] [HELLO BASTIAN]",
