@@ -1,23 +1,51 @@
+import codecs
 import socket
 import threading
 import base64
-
-# this is an attempt at some functions
-# TODO: check everything and add remaining functions, test functionality
-
-HOST = '127.0.0.1'
-PORT = 13370
-client_information = []
-
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind((HOST, PORT))
-server.listen()
+import json
+from multipledispatch import dispatch
 
 
 # register client at the server
-def register(id, first_name, last_name, public_key):
-    current_client = [id, first_name, last_name, public_key]
-    client_information.append(current_client)
+@dispatch(str, str, str)
+def register(id, name, public_key):
+    new_user = [{
+        'id': id,
+        'name': name,
+        'public_key': public_key
+    }]
+    with codecs.open('json_files/all_users.json', 'r+', encoding='utf8') as users_file:
+        data = json.load(users_file)
+        print(new_user[0]['id'])
+        for user in data['users']:
+            if user['id'] == new_user[0]['id']:
+                return
+        data['users'] += new_user
+        users_file.seek(0)
+        json.dump(data, users_file, indent=4)
+        users_file.truncate()
+        return
+    # current_client = [id, name, public_key]
+    # client_information.append(current_client)
+
+
+"""
+Registers user based on the JSON file provided for authentication, and if a user exists, does not register them
+"""
+
+
+@dispatch(str)
+def register(json_file):
+    with codecs.open('json_files/all_users.json', 'r+', encoding='utf8') as users_file:
+        data = json.load(users_file)
+        for user in data['users']:
+            if user['id'] == json_file[0]['id']:
+                return
+        data['users'] += json_file
+        users_file.seek(0)
+        json.dump(data, users_file, indent=4)
+        users_file.truncate()
+        return
 
 
 # return public key of someone
@@ -45,6 +73,8 @@ def client_connection(clientconn, address):  # for just one client
     print("Connected by: ", address)
     while True:
         data = clientconn.recv(1024)
+        data_in_json = json.loads(data.decode('utf8').replace("'", '"'))
+        register(data_in_json)
         if not data:
             break
         clientconn.sendall(data)
@@ -54,6 +84,9 @@ def client_connection(clientconn, address):  # for just one client
 
 # TODO: send message functions need to be implemented
 def send_message(id, encrypted_message):
+    for single_client in client_information:
+        if single_client.index(0) == id:
+            pass
     pass
 
 
@@ -61,12 +94,23 @@ def send_message(first_name, last_name, encrypted_message):
     pass
 
 
+# this is an attempt at some functions
+# TODO: check everything and add remaining functions, test functionality
+
+HOST = '127.0.0.1'
+PORT = 13370
+client_information = []
+
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.bind((HOST, PORT))
+server.listen()
+
 # infinite loop, creates different thread for every client
 while True:
     client, address = server.accept()
     client_thread = threading.Thread(args=(client, address), target=client_connection)
     client_thread.start()  # to be able to handle multiple clients
-    print("New thread started.")
+    # print("New thread started.")
 
 # Michal's one :D
 # with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
