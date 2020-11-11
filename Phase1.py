@@ -17,7 +17,9 @@ key_path = 'keys/'
 Class of client
 It will generate unique id and public_key automatically
 '''
-class client:
+
+
+class Client:
 
     def __init__(self, first_name, last_name):
         self.first_name = first_name
@@ -83,7 +85,7 @@ def get_public_key(label):
 
 if __name__ == '__main__':
     #initialize a client
-    c1 = client('Tianchen','Luo')
+    c1 = Client('Tianchen', 'Luo')
     print('Client --' + c1.full_name + '-- first_name is: ', c1.first_name)
     print('Client --' + c1.full_name + '-- last_name is: ', c1.last_name)
     print('Client --' + c1.full_name + '-- ID is: ',c1.id)

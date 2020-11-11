@@ -4,7 +4,9 @@ import threading
 import base64
 import json
 from multipledispatch import dispatch
-import rsa
+from Crypto.Cipher import PKCS1_OAEP, AES
+from Crypto.PublicKey import RSA
+from Crypto.Random import get_random_bytes
 
 
 # register client at the server
@@ -66,12 +68,12 @@ def retrieve_public_key(first_name, last_name):
     return clients_with_this_name
 
 
-def show_whois_online(user_id):
+def show_whois_online(user_id, public_key):
     global client_information
     for single_client in client_information:
         if single_client[0] == user_id:
-            single_client[3].sendall(bytes(', '.join([client_id[0] for client_id in client_information]),
-                                           encoding='UTF-8'))
+            single_client[3].sendall(
+                encrypt_message(public_key, ', '.join([client_id[0] for client_id in client_information])))
 
 
 # TODO: modify this so it does everything it needs to do
@@ -86,7 +88,7 @@ def client_connection(clientconn, address):  # for just one client
     register(client_id, name, public_key)
     current_client = [client_id, name, public_key, clientconn]
     client_information.append(current_client)
-    clientconn.sendall(b'Connected successfully!')
+    clientconn.sendall(encrypt_message(public_key, "Connected successfully!"))
     while threading.currentThread().is_alive():
         while True:
             data = clientconn.recv(1024)
@@ -94,7 +96,7 @@ def client_connection(clientconn, address):  # for just one client
                 data = data.decode("utf-8").split(" ", maxsplit=2)
                 send_message(client_id, data[1], data[2])
             elif data.decode("utf-8") == "ONLINE":
-                show_whois_online(client_id)
+                show_whois_online(client_id, public_key)
     client_information = [conn_client for conn_client in client_information if conn_client[0] != client_id]
     clientconn.close()
 
@@ -103,14 +105,27 @@ def client_connection(clientconn, address):  # for just one client
 def send_message(sender_id, receiver_id, plaintext_message):
     for single_client in client_information:
         if single_client[0] == receiver_id:
-            message = plaintext_message
-            # message = encrypt_message(single_client[0], plaintext_message)
-            single_client[3].sendall(b'Message from'+bytes(sender_id, encoding='utf8')+b': '+bytes(message, encoding='utf8'))
+            message = "Message from: "+sender_id+": "+plaintext_message
+            message = encrypt_message(single_client[2], message)
+            single_client[3].sendall(message)
     return
 
 
 def encrypt_message(public_key, message):
-    return rsa.encrypt(bytes(message, encoding='utf-8'), public_key)
+    if not public_key.startswith("-----BEGIN RSA PUBLIC KEY-----"):
+        public_key = "-----BEGIN RSA PUBLIC KEY-----\n"+public_key+"\n-----END RSA PUBLIC KEY-----"
+    recipient_key = RSA.importKey(public_key)
+    session_key = get_random_bytes(16)
+
+    # Encrypt the session key with the public RSA key
+    cipher_rsa = PKCS1_OAEP.new(recipient_key)
+    enc_session_key = cipher_rsa.encrypt(session_key)
+
+    # Encrypt the data with the AES session key
+    cipher_aes = AES.new(session_key, AES.MODE_EAX)
+    ciphertext, tag = cipher_aes.encrypt_and_digest(message.encode("UTF-8"))
+    encrypted_message = b"".join([x for x in (enc_session_key, cipher_aes.nonce, tag, ciphertext)])
+    return encrypted_message
 
 
 # def send_message(first_name, last_name, encrypted_message):
