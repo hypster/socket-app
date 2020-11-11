@@ -92,7 +92,7 @@ def client_connection(clientconn, address):  # for just one client
     while threading.currentThread().is_alive():
         while True:
             data = clientconn.recv(1024)
-            if data.decode("utf-8").startswith("MSG"):
+            if data.decode("utf-8").startswith("SEND"):
                 data = data.decode("utf-8").split(" ", maxsplit=2)
                 send_message(client_id, data[1], data[2])
             elif data.decode("utf-8") == "ONLINE":

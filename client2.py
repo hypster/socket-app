@@ -29,6 +29,7 @@ def decode_rsa_message(message):
     encoded_message = cipher_aes.decrypt_and_verify(ciphertext, tag)
     return encoded_message.decode("utf-8")
 
+
 with open("json_files/config_2.json") as json_file:
     json_data = json.load(json_file)
     HOST = json_data['server']['ip']
