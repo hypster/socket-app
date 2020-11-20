@@ -22,7 +22,7 @@ def register(id, name, public_key):
     }]
 
     for i in client_information:
-        if i['id'] == new_user['id']:
+        if i['id'] == new_user[0]['id']:
             registered = False
             return register
 
