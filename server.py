@@ -9,6 +9,7 @@ from Crypto.PublicKey import RSA
 from Crypto.Random import get_random_bytes
 
 
+
 # register client at the server
 @dispatch(str, str, str)
 def register(id, name, public_key):
@@ -125,14 +126,16 @@ def encrypt_message(public_key, message):
     cipher_aes = AES.new(session_key, AES.MODE_EAX)
     ciphertext, tag = cipher_aes.encrypt_and_digest(message.encode("UTF-8"))
     encrypted_message = b"".join([x for x in (enc_session_key, cipher_aes.nonce, tag, ciphertext)])
+
     return encrypted_message
+
+
 
 
 # def send_message(first_name, last_name, encrypted_message):
 #    pass
 
 
-# this is an attempt at some functions
 # TODO: check everything and add remaining functions, test functionality
 
 HOST = '127.0.0.1'
@@ -162,3 +165,5 @@ while True:
 #            if not data:
 #                break
 #            connection.sendall(data)
+
+

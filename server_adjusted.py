@@ -7,8 +7,23 @@ from multipledispatch import dispatch
 from Crypto.Cipher import PKCS1_OAEP, AES
 from Crypto.PublicKey import RSA
 from Crypto.Random import get_random_bytes
+import client_class as cl
 
 # TODO: add a client class ? so we can let it initialise with the JSON file
+
+"""
+#Tianchen: See client_class.py, the client class can be initialised like :
+input is the name of json file of client
+
+client_1 = cl.Client('config_1')
+print(client_1.id)
+print(client_1.pubkey)
+print(client_1.name)
+print(client_1.prikey)
+
+
+"""
+
 
 # register client at the server
 @dispatch(str, str, str)
@@ -109,7 +124,20 @@ def client_connection(clientconn, address):  # for just one client
 def send_message(sender_id, receiver_id, plaintext_message):
     for single_client in client_information:
         if single_client['id'] == receiver_id:
-            message = "Message from: "+sender_id+": "+plaintext_message
+            message = "Message from: " + sender_id + ": " + plaintext_message
+            message = encrypt_message(single_client['public_key'], message)
+            for i in id_connections:
+                if i[0] == receiver_id:
+                    single_client[i[1]].sendall(message)
+    return
+
+
+# I think the situation that to make sure communication know each other is when the name of receiver_name is not unique
+def send_message(sender_id, receiver_name, plaintext_message):
+    for single_client in client_information:
+        if single_client['name'] == receiver_name:
+            receiver_id = single_client['id']
+            message = "Message from: " + sender_id + ": " + plaintext_message
             message = encrypt_message(single_client['public_key'], message)
             for i in id_connections:
                 if i[0] == receiver_id:
@@ -119,9 +147,11 @@ def send_message(sender_id, receiver_id, plaintext_message):
 
 # TODO: needs to be done in client - using the get public key methods
 # TODO: also, I think we need to use base64 encoding?
+# Tianchen: I think the the encrypt_message implemented here by michel is correct, since we need to use pubkey from json file
+# which means we are not able to generate a .pem license. the pub and pri key from json file is already base64
 def encrypt_message(public_key, message):
     if not public_key.startswith("-----BEGIN RSA PUBLIC KEY-----"):
-        public_key = "-----BEGIN RSA PUBLIC KEY-----\n"+public_key+"\n-----END RSA PUBLIC KEY-----"
+        public_key = "-----BEGIN RSA PUBLIC KEY-----\n" + public_key + "\n-----END RSA PUBLIC KEY-----"
     recipient_key = RSA.importKey(public_key)
     session_key = get_random_bytes(16)
 
@@ -136,19 +166,35 @@ def encrypt_message(public_key, message):
     return encrypted_message
 
 
-# TODO: check everything and add remaining functions, test functionality
-
-HOST = '127.0.0.1'
-PORT = 13370
-client_information = []
 id_connections = []
+# TODO: check everything and add remaining functions, test functionality
+if __name__ == '__main__':
+    client_information = []
+    client_1 = cl.Client('config_1')
+    client_2 = cl.Client('config_2')
+    # print(client_1.id)
+    # print(client_1.pubkey)
+    # print(client_1.name)
+    # print(client_1.prikey)
 
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind((HOST, PORT))
-server.listen()
+    register(client_1.id, client_1.name, client_1.pubkey)
+
+    print(client_information)
+
+    HOST = '127.0.0.1'
+    PORT = 13370
+    client_information = []
+
+
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind((HOST, PORT))
+    server.listen()
 
 # infinite loop, creates different thread for every client
-while True:
-    client, address = server.accept()
-    client_thread = threading.Thread(args=(client, address), target=client_connection)
-    client_thread.start()  # to be able to handle multiple clients
+    while True:
+        client, address = server.accept()
+        client_thread = threading.Thread(args=(client, address), target=client_connection)
+        client_thread.start()  # to be able to handle multiple clients
+
+
+
