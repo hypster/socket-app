@@ -2,7 +2,7 @@
 @author: yiping
 """
 import json
-import struct
+import rsa
 BUFLEN = 1024
 
 
@@ -10,19 +10,12 @@ def format_message(msg):
     """format message with custom protocal
 
     :param msg: send data in json format
-    :return: bytestring with header and body
+    :return: message with header and body
     """
     body = msg.encode('utf-8')
     body_len = len(body)
-
-    header = struct.pack('!L', body_len)
-    # header = int.to_bytes(body_len, 4, byteorder='big')  # header is 4 byte long
+    header = int.to_bytes(body_len, 4, byteorder='big')  # header is 4 byte long
     return header + body
-
-def parse_message(bytes):
-    str = bytes.decode('utf-8')
-    print(str)
-    return json.loads(str)
 
 def get_response(socket):
     """return body in the parsed res
@@ -32,6 +25,7 @@ def get_response(socket):
     header = socket.recv(4)
     if not header:
         return None
+
     body_length = int.from_bytes(header, byteorder='big')
     body = socket.recv(body_length)
 
