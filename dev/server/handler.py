@@ -6,7 +6,7 @@ def handle_retrieve_public_key(req, sess):
     print('in handle retrieve')
     _id = None
     if 'id' in req:
-        _id = req['id'].lower()
+        _id = req['id']
 
         if _id in users:
             public_key = users[_id]['public']
@@ -55,20 +55,21 @@ def handle_start(res, sess):
 def handle_register(res, conn, addr):
 
     try:
-        id = res['id'].lower()
-        if id in users:
+        _id = res['id']
+        # print("id :" + _id)
+        if _id in users:
             return {'status': 1, 'text': 'you registered already'}
         firstname = res['firstname'].lower()
         lastname = res['lastname'].lower()
         pk = res['public']
         # save in users table
-        users[id] = {'firstname': firstname, 'lastname': lastname, 'id': id, 'public': pk}
+        users[_id] = {'firstname': firstname, 'lastname': lastname, 'id': _id, 'public': pk}
 
         # save name-id mapping
         if (firstname, lastname) in name2id:
-            name2id[(firstname, lastname)].append(id)
+            name2id[(firstname, lastname)].append(_id)
         else:
-            name2id[(firstname, lastname)] = [id]
+            name2id[(firstname, lastname)] = [_id]
 
         # save login status in connections
         # connections[addr] = id

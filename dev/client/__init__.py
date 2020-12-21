@@ -209,8 +209,8 @@ class Client:
         s.sendall(body.encode('utf-8'))
 
     def send_from_input(self):
-        txt = self.ent_input.get()
-        self.ent_input.delete(0, END)
+        txt = self.ent_input.get("1.0",END)
+        self.ent_input.delete("1.0", END)
         msg = parse_action(txt)
         if msg is None:
             return self.txt_chat.insert(END, f"Input format: send [firstname, lastname]/[id] [your message]\n")

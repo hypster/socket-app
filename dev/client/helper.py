@@ -5,15 +5,15 @@ def parse_action(action):
         if verb.lower() == 'send':
             start = action.index('[')
             end = action.index(']')
-            nameorid = action[start+1:end].lower()
+            nameorid = action[start+1:end]
             action = action[end+1:]
             start = action.index('[')
             end = action.index(']')
             msg = action[start+1:end]
             if ',' in nameorid:
                 [firstname, lastname] = nameorid.split(',')
-                firstname = firstname.strip()
-                lastname = lastname.strip()
+                firstname = firstname.strip().lower()
+                lastname = lastname.strip().lower()
                 return {'type':'send', 'firstname': firstname, 'lastname': lastname, 'message': msg}
             else:
                 return {'type': 'send', 'id':  nameorid, 'message': msg}

@@ -2,3 +2,4 @@
 *.pem
 *.ppk
 *.pyc
+__pycache__

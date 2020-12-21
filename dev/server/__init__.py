@@ -95,7 +95,7 @@ class Server:
         new_sess = session.Session(conn, addr, public=res['public'])
 
         if obj['status'] == 1:
-            new_sess.user = users[res['id'].lower()]
+            new_sess.user = users[res['id']]
 
         new_sess.send_session_key(obj)
 
