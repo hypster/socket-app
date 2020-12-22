@@ -4,7 +4,6 @@ SERVER_PORT = 52800
 
 SESSION_TAG = 'session_tag'
 
-
 # online info
 sessions = [] # list of session
 socket2session = {} # mapping from socket to session

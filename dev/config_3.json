@@ -1,0 +1,27 @@
+{
+	"general": {
+		"duration": "360",
+		"retries": "5",
+		"timeout": "10"
+	},
+	"person": {
+		"id": "123abc",
+		"name": "Da Qing Yin Hang, (Bank)",
+		"keys": {
+		"private": "MIIEogIBAAKCAQEA1PArVEDBDoqWalMtZgTONKs7bWoEEBQbOlzuO7Q/ud+IKHvs\nj3mACiuQ9p71XqxPh1Li84n02nrBixi2iaErHv58YzaunqnMdeQZaJpxNbLT8Mwp\nMc+7gIIz1q4DrkKZ1MCJz8AsTMHrwDhDOlvhQ+7+P37itFRJBrhOshcRzbWwvssh\nTGR2kzqeLInvJQtOh0qDj/6LIHtczV7wKzlstOYdrK5fzLksZQaA5WDO6mOm/q1C\nethXG0uNOhMQmGO+wnqy5Edvz94KszHhnMzDBh4O2AwNC60sSPkCZCt8I3J2jUkE\n9TKfLd8UeAhepFHmHnWN5F63sKO6ufStQ4tUvQIDAQABAoH/GmrsxLms/qAsQFbf\nkGWTAdFnuHt/esKNQpol7t/xS2Y4LLgQJJb1us6gwQWHwG2vEd7tN6asp89hIiSw\nGmcgWX7GlZCTgS/vXwRyQC/Ajwyj/K8RgtnVB6U6mgjAH1nBkjsgYeHYqp0GGcok\ngkYjNSq8KRL6mr8FUFTUx4LIY9h0ByGQbw9v8SGyoD+kImwkU1Xny1ASrVtrg8Le\n3elSgMXva9DJ6YkBI2NLlUzUgxP8fDxdEWYJ65TiQDzkgRCRXZs1Vgzprd7jUBep\noj3kscPVsizN1TMJyRmIUUZO45v9dWkE1qfmmtPlolC55N0MzcJ8WspJ+80BQxdv\nPeuxAoGBANdv0MmBL5JX2Py8msBCebhWb49oIzSSoQGNGowiMl5CzRaKvExtKhnJ\n8BPJkz0ycTFxPbFDfFk/QAKl3Llet/fIV5f18OCFUqQVbB3RuhcwavyP4wzhoHCj\ngdDPH2OhvOVB2z4SswYhHbbTjKZnnr/lYIPsE/dhOGTWfz/ADrjNAoGBAP0H6zLO\n2THDR1kb3FDE07PBNem2kYL3f2zO2mOY1lulEBYh2qnggEf0YsAmow9s4K01nNIH\nc3ttdHEDA/6ltIerwfRjLzMvnLLVlt+EfQo7FiB9aCWKC9IwOKppcV0/fqu02My0\n+FsG1z3LU+4J6yc1VZBKs3sDCNZpE4scH8uxAoGASDAnfd3T2u2kv8tS72lW7/XG\nm/8BDPS1DpgBdUNgLUWlAxCp19IccVfBImBA/hiQ5UhUq7k5SY5wHHMHavXaHyT6\ndOjsNc92yZSEDdngyTRoJQjxw7c204d2UEmW8wOXEBrpI/uQEVW3ZzOrxXajMxnh\nJVNNvW7OPrvBF9N7G2ECgYEAoH1FURSh7k5OEtb5BsHRBVKnP3XtFYSl7f3FxyZJ\n0BcB/Qe8CcO7megIOphHFKGaYEKBFTZkqQTjtkqTXhD8UJFAlCHU7kJkwYl4CI2g\nQbz4a+MfC7Bjjw3G40+998cuMPqkCDNA03ujSi6NLY5c+KF7g+ndrUhfcp9zJejQ\nwgECgYEAvqJcOAcMMjsjPFgfJnJIP9LIbfCUd3f/zlAuEXkAnMXofs840hvVMVFK\nUALa1fCpzVyiQZgviM/8VeXsnBfyJveuUlXK//o/IZ0605AA/DxlvkTTbCEwQSgj\nhNrIAs33PXAsGzSN1Lx43Zs3Tad5gAH9rnHOzxa3AVoK2RbFzWA=",
+		"public": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1PArVEDBDoqWalMtZgTO\nNKs7bWoEEBQbOlzuO7Q/ud+IKHvsj3mACiuQ9p71XqxPh1Li84n02nrBixi2iaEr\nHv58YzaunqnMdeQZaJpxNbLT8MwpMc+7gIIz1q4DrkKZ1MCJz8AsTMHrwDhDOlvh\nQ+7+P37itFRJBrhOshcRzbWwvsshTGR2kzqeLInvJQtOh0qDj/6LIHtczV7wKzls\ntOYdrK5fzLksZQaA5WDO6mOm/q1CethXG0uNOhMQmGO+wnqy5Edvz94KszHhnMzD\nBh4O2AwNC60sSPkCZCt8I3J2jUkE9TKfLd8UeAhepFHmHnWN5F63sKO6ufStQ4tU\nvQIDAQAB"
+		}
+	},
+	"accounts": {
+		"12345": {"user_id":  "5856e6cd-0da6-4573-9a04-cbb11f5e68d3", "balance":  1000},
+		"45678": {"user_id": "6398C613619E4DCA88220ACA49603D87", "balance": 10}
+	},
+	"server":
+	{
+		"ip": "127.0.0.1",
+		"port": "52800"
+	},
+	"actions": [
+
+		]
+}

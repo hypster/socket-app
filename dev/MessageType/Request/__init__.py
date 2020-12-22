@@ -1,0 +1,5 @@
+MES = 1
+RET_PUB_KEY = 2
+MES_BUS = 3
+REGISTER = 4
+

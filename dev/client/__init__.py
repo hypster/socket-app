@@ -10,7 +10,7 @@ from Session.session import Session
 from tkinter import *
 from tkinter import messagebox
 from client import client_global
-from client.helper import parse_action
+from client.parser import parse_action
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import AES, PKCS1_OAEP
 import MessageType
@@ -29,6 +29,9 @@ class Client:
         root = self.draw_ui()
 
         self.public_keys = {}
+
+        self.handlers = {}
+        self.register_all_handlers()
 
         pk_str = '-----BEGIN RSA PRIVATE KEY-----\n' + self.info['person']['keys'][
             'private'] + '\n-----END RSA PRIVATE KEY-----'
@@ -122,6 +125,13 @@ class Client:
                     self.handle_start(res)
                     bytes_buffer = bytes()
 
+
+    def register_all_handlers(self):
+        self.add_handler(MessageType.ACK, self.handle_ack_general)
+        self.add_handler(MessageType.ACK_MSG, self.handle_ack_message)
+        self.add_handler(MessageType.PUB_KEY, self.handle_public_key)
+        self.add_handler(MessageType.USER_MSG, self.handle_user_message)
+
     def start_session(self, host, port):
 
         self.txt_chat.insert(END, "Register and start new session...\n")
@@ -204,7 +214,7 @@ class Client:
         firstname = firstname.strip()
         lastname = lastname.strip()
         public = person['keys']['public']
-        body = {'type': 'register', 'id': id, 'firstname': firstname, 'lastname': lastname, 'public': public}
+        body = {'type': MessageType.Request.REGISTER, 'id': id, 'firstname': firstname, 'lastname': lastname, 'public': public}
         body = json.dumps(body)
         s.sendall(body.encode('utf-8'))
 
@@ -261,6 +271,7 @@ class Client:
 
 
     def send2other(self, public_key, msg):
+        print(msg)
         self.pending_msg[msg['message_id']] = msg
         # msg['message_id'] = client_global.pending_id  # add message id
         # client_global.pending_id += 1
@@ -277,21 +288,20 @@ class Client:
 
     def retrieve_public_key(self, _id=None, first_name=None, last_name=None):
         if _id is not None:
-            self.session.send({'type': 'retrieve', 'id': _id})
+            self.session.send({'type': MessageType.Request.RET_PUB_KEY, 'id': _id})
         elif first_name is not None and last_name is not None:
-            self.session.send({'type': 'retrieve', 'firstname': first_name, 'lastname': last_name})
+            self.session.send({'type': MessageType.Request.RET_PUB_KEY, 'firstname': first_name, 'lastname': last_name})
+
+    def add_handler(self, type, handle):
+            self.handlers[type] = handle
 
     def handle_start(self, res):
         print(f'received: {res}')
-        type = res['type']
-        if type == MessageType.PUB_KEY:
-            self.handle_public_key(res)
-        elif type == MessageType.ACK:
-            self.handle_ack_general(res)
-        elif type == MessageType.ACK_MSG:
-            self.handle_ack_message(res)
-        elif type == MessageType.USER_MSG:
-            self.handle_user_message(res)
+        if 'type' in res:
+            _type = res['type']
+            if _type in self.handlers:
+                self.handlers[_type](res)
+
 
     def handle_ack_general(self, res):
         if res['type'] == MessageType.ACK:
@@ -345,8 +355,11 @@ class Client:
     def handle_user_message(self, res):
         res = self.parse_user_message(res)
         sender = res['source']
+        text = res['message']
+        if text.startswith('[') and text.endswith(']'):
+            text = text[1:-1]
         time = datetime.fromtimestamp(res['timestamp']).ctime()
-        msg = f"MESSAGE FROM {sender['firstname'].upper()} {sender['lastname'].upper()}({sender['id']}) at {time}: {res['message']}\n"
+        msg = f"MESSAGE FROM {sender['firstname'].upper()} {sender['lastname'].upper()}({sender['id']}) at {time}: {text}\n"
         self.txt_chat.insert(END, msg)
 
     def handle_public_key(self, res):

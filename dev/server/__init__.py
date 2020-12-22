@@ -9,13 +9,17 @@ from server.server_global import *
 
 from server.handler import *
 from MessageType.message_function import *
+import json
 
-def handle_retrieve_public_key(res):
-    pass
+
+def load_bank_info():
+    with open('config_3.json', 'rb') as f:
+        return json.loads(f.read())['person']
 
 
 class Server:
     def __init__(self):
+        self.bank_info = load_bank_info()
         self.listen_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.listen_socket.bind((SERVER_HOST, SERVER_PORT))
 
@@ -90,7 +94,7 @@ class Server:
         res = parse_message(received_byte)
         print('received: ' + str(res))
 
-        obj = handle_register(res, conn, addr)
+        obj = handle_register(res, conn, addr, self.bank_info)
         # [session_key, enc_session_key] = session.generate_encrypt_session_key(res['public'])
         new_sess = session.Session(conn, addr, public=res['public'])
 
