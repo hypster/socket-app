@@ -1,6 +1,3 @@
-"""
-@author: yiping
-"""
 import json
 import struct
 BUFLEN = 1024

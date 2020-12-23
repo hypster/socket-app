@@ -54,7 +54,7 @@ def handle_start(req, sess):
 
 def handle_register(req, conn, addr, bank_info):
 
-    try:
+    # try:
         _id = req['id']
         # print("id :" + _id)
         if _id in users:
@@ -77,12 +77,12 @@ def handle_register(req, conn, addr, bank_info):
         # save login status in connections
         # connections[addr] = id
         return {'status': 1, 'text': 'register ok'}
-    except (KeyError, AttributeError):
-        return {'status': 0, 'text': 'please pass id, firstname, lastname and public key'}
+    # except (KeyError, AttributeError):
+    #     return {'status': 0, 'text': 'please pass id, firstname, lastname and public key'}
 
 
 def handle_send(req,sess):
-    # try:
+    try:
         if 'id' in req: # addressed with id
             ids = [req['id']]
         else: # addressed with name
@@ -117,12 +117,14 @@ def handle_send(req,sess):
 
                 other_sess.send(msg) #send to receiver
 
-    # except (KeyError, AttributeError):
-    #     return sess.send({'status': 0, 'type': MessageType.ACK, 'text': 'please pass id/firstname, lastname and your message'})
+    except (KeyError, AttributeError):
+        return sess.send({'status': 0, 'type': MessageType.ACK, 'text': 'please pass id/firstname, lastname and your message'})
 
 
 def create_send_message(req, sess):
     msg = {'status': 1, 'type': MessageType.USER_MSG, 'message': req['message']}
+    if 'status' in req:
+        msg['meta'] = req['status']
     if 'message_type' in req:
         msg['message_type'] = req['message_type']
     user = {}

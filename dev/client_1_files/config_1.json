@@ -19,7 +19,12 @@
 	},
 	"actions": [
 		"SEND [Da Qing Yin Hang, (bank)] [Give me the money or your life]",
-		"SEND [Da Qing Yin Hang, (bank)] add [12345] [45678] [100]",
+		"SEND [Da Qing Yin Hang, (bank)] add [12345] [45678] [100.20]",
+		"SEND [Da Qing Yin Hang, (bank)] sub [12345] [100.50]",
+		"SEND [Da Qing Yin Hang, (bank)] sub [122345] [100.50]",
+		"SEND [Da Qing Yin Hang, (bank)] sub [12345] [-100.50]",
+		"SEND [Da Qing Yin Hang, (bank)] add [12345] [45678] [-100.20]",
+		"SEND [Da Qing Yin Hang, (bank)] sub [12345] [99990.50]",
 		"SEND [EIFERT, THOMAS] [HELLO THOMAS]",
         "SEND [6398C613619E4DCA88220ACA49603D87] [HELLO THOMAS 2]",
         "SEND [DOE, JOHN] [HELLO JOHN]"

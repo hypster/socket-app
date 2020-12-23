@@ -4,24 +4,29 @@ from client.parser import *
 from bank.parser import *
 import MessageType
 from bank.business.handler import _handle_substract, _handle_transfer
-
+import log_config
+from bank.business import Directive
+import logging
+import tkinter
 
 class Bank(Client):
-    def __init__(self, config_file=''):
+    def __init__(self, config_file='', log_file=''):
+        log_config.config(log_file)
         self.conn = None
         self.connect_db(config_file)
         if self.conn:
-            super().__init__(config_file)
+            super().__init__(config_file, log_file)
         else:
-            print('connection to db failed')
+            logging.debug('connection to db failed')
             exit(1)
 
 
     def connect_db(self, config_file):
-        print(' connecting to db')
+        logging.debug(' connecting to db...')
         conn = self.read_info(config_file)['accounts']
         if conn:
             self.conn = conn
+            logging.debug('connected to db')
 
 
     def handle_substract(self, req, command, conn):
@@ -46,16 +51,18 @@ class Bank(Client):
     # override
     def handle_user_message(self, req):
         super().handle_user_message(req)
-        if check_directive_format(req['message']):
-            print('message is for transaction')
+        if is_normal_message(req['message']):
+            return
+        if is_valid_directive(req['message']):
             command = parse_directive(req['message'])
-            print(command)
-            if command is None:
-                return
-            if command['action'] == 'add':
-                self.handle_transfer(req, command, self.conn)
-            elif command['action'] == 'sub':
-                self.handle_substract(req, command, self.conn)
+            if command:
+                if command['action'].lower() == Directive.ADD:
+                    self.handle_transfer(req, command, self.conn)
+                elif command['action'].lower() == Directive.SUB:
+                    self.handle_substract(req, command, self.conn)
+            else:
+                self.start_send({'type': MessageType.Request.MES, 'status': 0, 'id': req['source']['id'],
+                                 'message': 'Parse directive failed. Please check your input'})
         else:
-            print('normal message or unsupported transaction')
-
+            self.start_send({'type': MessageType.Request.MES, 'status': 0, 'id': req['source']['id'],
+                             'message': 'Directive is not unsupported'})

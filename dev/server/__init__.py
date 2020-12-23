@@ -1,6 +1,3 @@
-"""
-@author: yiping
-"""
 import socket
 import select
 # from handlers import client_handlier
@@ -12,14 +9,14 @@ from MessageType.message_function import *
 import json
 
 
-def load_bank_info():
-    with open('config_3.json', 'rb') as f:
-        return json.loads(f.read())['person']
+def load_bank_info(bank_info):
+    with open(bank_info, 'rb') as f:
+        return json.loads(f.read())
 
 
 class Server:
-    def __init__(self):
-        self.bank_info = load_bank_info()
+    def __init__(self, bank_info):
+        self.bank_info = load_bank_info(bank_info)
         self.listen_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.listen_socket.bind((SERVER_HOST, SERVER_PORT))
 
@@ -78,7 +75,7 @@ class Server:
                     received[sess] = 0
                     to_receive[sess] = 0
                     obj = sess.parse_message(bytes_buffer[sess])
-                    print(f'recieved: {obj}')
+                    print('recieved message')
 
                     res_msg = handle_start(obj, sess)
                     bytes_buffer[sess] = bytes()

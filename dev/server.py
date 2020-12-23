@@ -1,2 +1,2 @@
 from server import Server
-Server().start()
+Server('./server_files/bank_info.json').start()

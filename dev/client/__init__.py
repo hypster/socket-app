@@ -16,10 +16,12 @@ from Crypto.Cipher import AES, PKCS1_OAEP
 import MessageType
 from datetime import datetime
 from time import sleep
-
+import log_config
+import logging
 
 class Client:
-    def __init__(self, config_file=''):
+    def __init__(self, config_file='', log_file=''):
+        log_config.config(log_file)
         self.info = self.read_info(config_file)
         self.retries = int(self.info['general']['retries'])
         self._g = self.next_msg()
@@ -63,10 +65,11 @@ class Client:
 
         lbl_input = Label(root, text='Enter messsage here:')
         ent_input = Text(root)
+        ent_input.bind("<Control-Return>", self.send_from_input)
         self.ent_input = ent_input
         txt_chat.pack()
-        btn_send_json = Button(root, text='send from json', command=self.send_from_json)
-        btn_send = Button(root, text='send', command=self.send_from_input)
+        btn_send_json = Button(root, text='Send prewritten message', command=self.send_from_json)
+        btn_send = Button(root, text='Send(ctrl+enter)', command=self.send_from_input)
         lbl_input.pack() #side = LEFT
         ent_input.pack() #side=LEFT, fill=BOTH, expand=TRUE
         btn_send.pack(side=RIGHT) #side=LEFT
@@ -87,7 +90,7 @@ class Client:
                     try:
                         length_bytes = session.socket.recv(4, socket.MSG_WAITALL)
                     except ConnectionError:
-                        print("server has been shut down.")
+                        logging.error("server has been shut down.")
                         child = []
                         for key in tk_root.children:
                             child.append(tk_root.children[key])
@@ -157,9 +160,9 @@ class Client:
             exit(1)
 
         else:
-            print(f"MESSAGE FROM SERVER: {(res['text'])}\n")
+            logging.debug(f"From server: {(res['text'])}\n")
             # show_str = f"received message from user: {res['firstname']}, {res['lastname']} with id {res['id']}\n{res['message']}\n"
-            self.txt_chat.insert(END, 'message from server: '.upper() + res['text'] + '\n')
+            self.txt_chat.insert(END, 'From server:\n' + res['text'] + '\n')
 
             return new_sess
 
@@ -206,7 +209,7 @@ class Client:
             return json.loads(f.read())
 
     def register(self, s):
-        print('sending register request')
+        logging.debug('sending register request')
         person = self.info['person']
         id = person['id']
         name = person['name']
@@ -218,7 +221,7 @@ class Client:
         body = json.dumps(body)
         s.sendall(body.encode('utf-8'))
 
-    def send_from_input(self):
+    def send_from_input(self, _=None):
         txt = self.ent_input.get("1.0",END)
         self.ent_input.delete("1.0", END)
         msg = parse_action(txt)
@@ -231,7 +234,7 @@ class Client:
         msg['retries'] = self.retries
         msg['message_id'] = client_global.pending_id
         client_global.pending_id += 1
-        print(msg)
+        logging.debug(msg)
         public_keys = []
         if 'firstname' in msg and 'lastname' in msg:
             firstname = msg['firstname'].lower()
@@ -239,9 +242,9 @@ class Client:
             name = (firstname, lastname)
 
             if name not in client_global.name2id:
-                print("public key is not in the list, retrieving first")
+                logging.debug("Public key is not in the list, retrieve first")
                 self.txt_chat.insert(END,
-                                     'receiver\'s public key is not available locally, send retrieve request to server\n')
+                                     'Receiver\'s public key is not available locally, send retrieve request to server\n')
                 self.msg_task[msg['message_id']] = msg
                 self.retrieve_public_key(first_name=firstname, last_name=lastname)
             else:
@@ -252,9 +255,9 @@ class Client:
 
         elif 'id' in msg:
             if msg['id'] not in client_global.public_keys:
-                print("public key is not in the list, retrieving first")
+                logging.debug("Public key is not in the list, retrieving first")
                 self.txt_chat.insert(END,
-                                     'receiver\'s public key is not available locally, send retrieve request to server\n')
+                                     'Receiver\'s public key is not available locally, send retrieve request to server\n')
 
                 self.msg_task[msg['message_id']] = msg
                 self.retrieve_public_key(_id=msg['id'])
@@ -267,11 +270,11 @@ class Client:
             msg = next(self._g)
             self.start_send(msg)
         except StopIteration:
-            messagebox.showinfo("message list is empty", "You have no more prewritten message to send.")
+            messagebox.showinfo("Message list is empty", "You have no more prewritten message to send.")
 
 
     def send2other(self, public_key, msg):
-        print(msg)
+        logging.debug(msg)
         self.pending_msg[msg['message_id']] = msg
         # msg['message_id'] = client_global.pending_id  # add message id
         # client_global.pending_id += 1
@@ -296,7 +299,7 @@ class Client:
             self.handlers[type] = handle
 
     def handle_start(self, res):
-        print(f'received: {res}')
+        # logging.debug(f'received: {res}')
         if 'type' in res:
             _type = res['type']
             if _type in self.handlers:
@@ -305,26 +308,29 @@ class Client:
 
     def handle_ack_general(self, res):
         if res['type'] == MessageType.ACK:
-            msg = f"MESSAGE FROM SERVER:  res['text']\n"
+            msg = f"From server:\nres['text']\n"
             self.txt_chat.insert(END, msg)
 
     def handle_ack_message(self, res):
         if res['type'] == MessageType.ACK_MSG:
             if res['status'] == 1:
                 time = datetime.fromtimestamp(res['timestamp']).ctime()
-                msg = f"MESSAGE FROM SERVER:  message sent at {time}\n"
-                self.txt_chat.insert(END, msg)
                 m_id = res['message_id']
                 origin_msg = self.pending_msg[m_id]
+                msg = origin_msg['message']
+                if msg.startswith('[') and msg.endswith(']'):
+                    msg = msg[1:-1]
+
                 if 'firstname' in origin_msg:
                     idorname = origin_msg['firstname'].capitalize() + ' ' + origin_msg['lastname'].capitalize()
                 else:
                     idorname = origin_msg['id']
-                self.txt_chat.insert(END, f"You sent message to {idorname}(loaded from local memory): {origin_msg['message']}\n")
+                self.txt_chat.insert(END, f"To {idorname} at {time}:\n{msg}\n")
+                logging.info(f'To {idorname}: {msg}')
                 self.remove_pending_message(m_id)
 
             else:  # send message error
-                msg = f'MESSAGE FROM SERVER:  {res["text"]}\n'
+                msg = f'From server:\n{res["text"]}\n'
                 self.txt_chat.insert(END, msg)
                 m_id = res['message_id']
                 num_left = self.pending_msg[m_id]['retries']
@@ -337,7 +343,7 @@ class Client:
         self.txt_chat.insert(END, f'Retry after {duration} second(s)\n')
         sleep(duration)
         if m_id not in self.pending_msg:  # message has been successfully sent
-            return print("message has already been sent. Abort retry action.")
+            return logging.debug("message has already been sent. Abort retry action.")
         self.pending_msg[m_id]['retries'] -= 1
         self.txt_chat.insert(END, f'Retry {self.retries - num_left + 1}th time\n')
         for _id in res['ids']:  # list of ids that are not online earlier
@@ -354,16 +360,24 @@ class Client:
 
     def handle_user_message(self, res):
         res = self.parse_user_message(res)
+        flag = 0
+        if 'meta' in res:
+            flag = res['meta']
+
         sender = res['source']
         text = res['message']
         if text.startswith('[') and text.endswith(']'):
             text = text[1:-1]
         time = datetime.fromtimestamp(res['timestamp']).ctime()
-        msg = f"MESSAGE FROM {sender['firstname'].upper()} {sender['lastname'].upper()}({sender['id']}) at {time}: {text}\n"
+
+        who = f"{sender['firstname'].capitalize()} {sender['lastname'].capitalize()}({sender['id']})"
+        msg = f"From {who} at {time}:\n{text}\n"
+        if flag: # if transaction success
+            logging.info(f"From {who}: {text}")
         self.txt_chat.insert(END, msg)
 
     def handle_public_key(self, res):
-        self.txt_chat.insert(END, "message from server: ".upper() + res['text'] + '\n')
+        self.txt_chat.insert(END, "From server:\n" + res['text'] + '\n')
         if 'users' in res:  # req is posted by name
             user = res['users'][0]
             firstname = user['firstname'].lower()
@@ -405,7 +419,7 @@ class Client:
         public_key = client_global.public_keys[_id]
         if m_id in self.msg_task:
             msg = self.msg_task[m_id]
-            print("sending message encrypted with public key")
+            logging.debug("sending message encrypted with public key")
             self.send2other(public_key, msg)
         return m_id
 
