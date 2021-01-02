@@ -1,6 +1,3 @@
-"""
-@author: yiping
-"""
 import socket
 import select
 from MessageType.message_function import *

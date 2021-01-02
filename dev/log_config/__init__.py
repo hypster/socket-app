@@ -11,12 +11,7 @@ def config(filename):
     # print = logger.debug
 
 if __name__ == '__main__':
-    config('test.log')
-    print('hello world')
-    print('hello world')
-    print('hello world')
-    print('hello world')
-    # logging.info('info')
-    # logging.debug('debug')
-    # logging.warning('warning')
-    # logging.error('error')
+    logging.info('info')
+    logging.debug('debug')
+    logging.warning('warning')
+    logging.error('error')

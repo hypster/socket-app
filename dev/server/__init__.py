@@ -21,6 +21,7 @@ class Server:
         self.listen_socket.bind((SERVER_HOST, SERVER_PORT))
 
     def start(self):
+
         self.listen_socket.listen(1)
         print(f"server listen on {SERVER_HOST}:{SERVER_PORT}")
 
